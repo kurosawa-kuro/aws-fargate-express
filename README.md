@@ -81,6 +81,9 @@ node_modules/
 
 ### 2-3. DockerイメージのビルドとECRへのプッシュ
 ```bash
+# 1. まずアカウントIDを環境変数に設定
+export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+
 # ECRへのログイン
 aws ecr get-login-password --region ap-northeast-1 | \
 docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com
