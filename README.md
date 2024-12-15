@@ -1,4 +1,3 @@
-# aws-fargate-express
 # AWS FargateでExpress APIをデプロイする手順書
 
 ## 1. ネットワーク環境の構築
@@ -24,9 +23,9 @@
    - HTTP (TCP/80): `0.0.0.0/0`
    - アプリケーションポート (TCP/3000): `0.0.0.0/0`
 
-## 2. アプリケーションの準備
+## 2. アプリケーションの準備と配置
 
-### GitHubリポジトリの作成
+### 2-1. GitHubリポジトリの作成
 - リポジトリ名: `aws-fargate-express`
 - 以下のファイルを作成:
 
@@ -56,10 +55,57 @@ app.listen(port, () => {
 });
 ```
 
-### ローカルでの動作確認
+#### package.json
+```json
+{
+  "name": "aws-fargate-express",
+  "version": "1.0.0",
+  "main": "app.js",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
+```
+
+#### .gitignore
+```
+node_modules/
+.env
+```
+
+### 2-2. ECRリポジトリの作成
+1. Amazon ECRコンソールで「リポジトリの作成」
+2. 設定:
+   - 可視性: Private
+   - リポジトリ名: `aws-fargate-express-01-repository`
+
+### 2-3. DockerイメージのビルドとECRへのプッシュ
 ```bash
+# ECRへのログイン
+aws ecr get-login-password --region ap-northeast-1 | \
+docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com
+
+# イメージのビルド
+docker build -t aws-fargate-express-01-repository .
+
+# タグ付け
+docker tag aws-fargate-express-01-repository:latest \
+${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com/aws-fargate-express-01-repository:latest
+
+# ECRへプッシュ
+docker push ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com/aws-fargate-express-01-repository:latest
+```
+
+### 2-4. ローカルでの動作確認
+```bash
+# 依存関係のインストール
+npm install
+
+# アプリケーションの起動
 node app.js
-# http://localhost:3000 で動作確認
+
+# Dockerコンテナとしての動作確認
+docker run -p 3000:3000 aws-fargate-express-01-repository
 ```
 
 ## 3. ECSの設定
@@ -70,7 +116,7 @@ node app.js
    - ファミリー名: `aws-fargate-express-01-task`
    - コンテナ設定:
      - 名前: `fargate-express`
-     - イメージURI: [ECRのイメージURI]
+     - イメージURI: `${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com/aws-fargate-express-01-repository:latest`
      - ポート: 3000
    - リソース:
      - CPU: 0.25 vCPU
@@ -102,3 +148,47 @@ node app.js
 2. パブリックIPアドレスを確認
 3. `http://<パブリックIP>:3000` でアクセス
 4. `{"message":"Hello World from Express!"}` が表示されることを確認
+
+## 5. トラブルシューティングガイド
+
+### イメージプッシュ関連の問題
+- ✓ AWS CLIの認証情報が正しく設定されているか
+- ✓ ECRリポジトリの権限設定
+- ✓ リージョンの設定が正しいか
+
+### タスクが起動しない場合
+- ✓ セキュリティグループの設定
+- ✓ IAMロールの権限
+- ✓ VPCの設定
+
+### アプリケーションにアクセスできない場合
+- ✓ パブリックIPの割り当て状態
+- ✓ ポート3000の開放状態
+- ✓ サブネットのルーティング
+
+## 6. 追加設定オプション
+
+### CI/CD設定
+- GitHub Actionsを使用した自動デプロイの設定
+- CodePipelineを使用した自動デプロイの設定
+- Blue-Greenデプロイメントの設定
+
+### 環境変数設定
+- AWS Systems Manager Parameter Storeの利用
+- Secrets Managerの利用
+- タスク定義での環境変数の設定
+
+### セキュリティ強化
+- VPCエンドポイントの設定
+- WAFの設定
+- CloudWatchログの設定
+
+### 監視設定
+- CloudWatchアラームの設定
+- X-Rayの統合
+- カスタムメトリクスの設定
+
+### コスト最適化
+- Fargateスポットの利用
+- Auto Scalingの設定
+- リソース使用率の監視と最適化
