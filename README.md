@@ -29,43 +29,6 @@
 - リポジトリ名: `aws-fargate-express`
 - 以下のファイルを作成:
 
-#### Dockerfile
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-EXPOSE 3000
-CMD ["node", "app.js"]
-```
-
-#### app.js
-```javascript
-const express = require('express');
-const app = express();
-const port = 3000;
-
-app.get('/', (req, res) => {
-  res.json({ message: 'Hello World from Express!' });
-});
-
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
-```
-
-#### package.json
-```json
-{
-  "name": "aws-fargate-express",
-  "version": "1.0.0",
-  "main": "app.js",
-  "dependencies": {
-    "express": "^4.18.2"
-  }
-}
-```
 
 #### .gitignore
 ```
