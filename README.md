@@ -27,13 +27,6 @@
 
 ### 2-1. GitHubリポジトリの作成
 - リポジトリ名: `aws-fargate-express`
-- 以下のファイルを作成:
-
-
-#### .gitignore
-```
-node_modules/
-.env
 ```
 
 ### 2-2. ECRリポジトリの作成
@@ -64,12 +57,6 @@ docker push ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com/aws-fargate-e
 
 ### 2-4. ローカルでの動作確認
 ```bash
-# 依存関係のインストール
-npm install
-
-# アプリケーションの起動
-node app.js
-
 # Dockerコンテナとしての動作確認
 docker run -p 3000:3000 aws-fargate-express-01-repository
 ```
@@ -114,47 +101,3 @@ docker run -p 3000:3000 aws-fargate-express-01-repository
 2. パブリックIPアドレスを確認
 3. `http://<パブリックIP>:3000` でアクセス
 4. `{"message":"Hello World from Express!"}` が表示されることを確認
-
-## 5. トラブルシューティングガイド
-
-### イメージプッシュ関連の問題
-- ✓ AWS CLIの認証情報が正しく設定されているか
-- ✓ ECRリポジトリの権限設定
-- ✓ リージョンの設定が正しいか
-
-### タスクが起動しない場合
-- ✓ セキュリティグループの設定
-- ✓ IAMロールの権限
-- ✓ VPCの設定
-
-### アプリケーションにアクセスできない場合
-- ✓ パブリックIPの割り当て状態
-- ✓ ポート3000の開放状態
-- ✓ サブネットのルーティング
-
-## 6. 追加設定オプション
-
-### CI/CD設定
-- GitHub Actionsを使用した自動デプロイの設定
-- CodePipelineを使用した自動デプロイの設定
-- Blue-Greenデプロイメントの設定
-
-### 環境変数設定
-- AWS Systems Manager Parameter Storeの利用
-- Secrets Managerの利用
-- タスク定義での環境変数の設定
-
-### セキュリティ強化
-- VPCエンドポイントの設定
-- WAFの設定
-- CloudWatchログの設定
-
-### 監視設定
-- CloudWatchアラームの設定
-- X-Rayの統合
-- カスタムメトリクスの設定
-
-### コスト最適化
-- Fargateスポットの利用
-- Auto Scalingの設定
-- リソース使用率の監視と最適化
